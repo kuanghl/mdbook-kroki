@@ -116,6 +116,8 @@ use std::path::PathBuf;
 pub struct MdKroki {
     endpoint: String,
     path_resolver: PathResolver,
+    client: reqwest::Client,
+    blocking_client: reqwest::blocking::Client,
 }
 
 impl MdKroki {
@@ -146,6 +148,8 @@ enum PathResolver {
 pub struct MdKrokiBuilder {
     endpoint: String,
     path_resolver: PathResolver,
+    client: reqwest::Client,
+    blocking_client: reqwest::blocking::Client,
 }
 
 impl MdKrokiBuilder {
@@ -225,11 +229,23 @@ impl MdKrokiBuilder {
         self
     }
 
+    pub fn client(mut self, client: reqwest::Client) -> Self {
+        self.client = client;
+        self
+    }
+
+    pub fn blocking_client(mut self, client: reqwest::blocking::Client) -> Self {
+        self.blocking_client = client;
+        self
+    }
+
     /// Consume self and build a renderer.
     pub fn build(self) -> MdKroki {
         MdKroki {
             endpoint: self.endpoint,
             path_resolver: self.path_resolver,
+            client: self.client,
+            blocking_client: self.blocking_client,
         }
     }
 }
@@ -239,6 +255,8 @@ impl Default for MdKroki {
         MdKroki {
             endpoint: "https://kroki.io".to_string(),
             path_resolver: PathResolver::None,
+            client: reqwest::Client::new(),
+            blocking_client: reqwest::blocking::Client::new(),
         }
     }
 }
@@ -248,6 +266,8 @@ impl Default for MdKrokiBuilder {
         MdKrokiBuilder {
             endpoint: "https://kroki.io".to_string(),
             path_resolver: PathResolver::None,
+            client: reqwest::Client::new(),
+            blocking_client: reqwest::blocking::Client::new(),
         }
     }
 }

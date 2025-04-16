@@ -13,12 +13,10 @@ impl MdKroki {
     ///
     /// Diagram render requests are awaited in parallel.
     pub async fn render(&self, mut content: String) -> Result<String> {
-        let client = reqwest::Client::new();
-
         let renders = self.get_render_requests(&content)?;
 
         let replace_futures = renders.map(|render| async {
-            let result = client
+            let result = self.client
                 .post(&self.endpoint)
                 .body(serde_json::to_string(&render).expect("could no serialize kroki request"))
                 .send()
@@ -54,13 +52,11 @@ impl MdKroki {
     /// Should only be called from a sync context. In an async context, the normal [render][MdKroki::render] method
     /// is recommended.
     pub fn render_sync(&self, mut content: String) -> Result<String> {
-        let client = reqwest::blocking::Client::new();
-
         let renders = self.get_render_requests(&content)?;
 
         let mut replaces = renders
             .map(|req| {
-                let result = client
+                let result = self.blocking_client
                     .post(&self.endpoint)
                     .body(serde_json::to_string(&req).expect("could no serialize kroki request"))
                     .send()
@@ -257,21 +253,15 @@ struct ReplaceRequest {
 }
 
 fn trim_replace_range(content: &str, range: &Range<usize>) -> Range<usize> {
-    let new_start =
-        range.start + (range.len() - content[range.start..range.end].trim_start().len());
-    let new_end = range.end - (range.len() - content[range.start..range.end].trim_end().len());
-    new_start..new_end
+    let s = &content[range.clone()];
+    let trimmed_start = s.len() - s.trim_start().len();
+    let trimmed_end = s.len() - s.trim_end().len();
+    (range.start + trimmed_start)..(range.end - trimmed_end)
 }
 
-fn process_xml(mut xml: String) -> Result<String> {
-    let start_index = xml
-        .find("<svg")
-        .unwrap_or_else(|| panic!("didn't find '<svg' in kroki response: {}", xml));
-    xml.replace_range(..start_index, "");
-    xml.insert_str(0, "<pre>");
-    let end_index = xml
-        .rfind("</svg>")
-        .unwrap_or_else(|| panic!("didn't find '</svg>' in kroki response: {}", xml));
-    xml.insert_str(end_index + 6, "</pre>");
-    Ok(xml.trim().to_string())
+fn process_xml(xml: String) -> Result<String> {
+    let svg_start = xml.find("<svg").ok_or_else(|| anyhow!("Missing <svg>"))?;
+    let svg_end = xml.rfind("</svg>").ok_or_else(|| anyhow!("Missing </svg>"))? + 6;
+    let svg_content = &xml[svg_start..svg_end];
+    Ok(format!("<pre class='diagram-kroki'>{}</pre>", svg_content.trim()))
 }
