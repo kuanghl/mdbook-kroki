@@ -12,14 +12,16 @@ use echarts::ECharts;
 
 
 pub fn make_app() -> App<'static, 'static> {
+    // 使用 clap 库构建命令行接口
+    // ./mdbook-echarts --help
     App::new("echarts-preprocessor")
         .about("A mdbook preprocessor to auto generate book summary")
-        .subcommand(
+        .subcommand(    // 检查渲染器支持
             SubCommand::with_name("supports")
-                .arg(Arg::with_name("renderer").required(true))
+                .arg(Arg::with_name("renderer").required(true)) 
                 .about("Check whether a renderer is supported by this preprocessor"),
         )
-        .subcommand(
+        .subcommand(    // 显示帮助
             SubCommand::with_name("help")
                 .about("help doc for use mdbook-echarts preprocessor"),
         )

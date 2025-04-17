@@ -34,10 +34,13 @@ level = 0
 ```
 
 ### 2. edit your markdown file
+
+- solution 1 no used.
+
 ````text
 
 ```echarts
-{
+option = {
   xAxis: {
     data: ['A', 'B', 'C', 'D', 'E']
   },
@@ -60,7 +63,7 @@ level = 0
 or 
 
 {% echarts %}
-{
+option = {
   xAxis: {
     data: ['A', 'B', 'C', 'D', 'E']
   },
@@ -82,6 +85,67 @@ or
 
 ````
 
+- solution 2 used.
+
+````text
+
+```echarts
+var chartDom = document.getElementById('main');
+var myChart = echarts.init(chartDom, null, {
+  renderer: 'svg'
+});
+var option;
+
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      data: [10, 22, 28, 43, 49],
+      type: 'bar',
+      stack: 'x'
+    },
+    {
+      data: [5, 4, 3, 5, 10],
+      type: 'bar',
+      stack: 'x'
+    }
+  ]
+};
+```
+
+or 
+
+{% echarts %}
+var chartDom = document.getElementById('main');
+var myChart = echarts.init(chartDom, null, {
+  renderer: 'svg'
+});
+var option;
+
+option = {
+  xAxis: {
+    data: ['A', 'B', 'C', 'D', 'E']
+  },
+  yAxis: {},
+  series: [
+    {
+      data: [10, 22, 28, 43, 49],
+      type: 'bar',
+      stack: 'x'
+    },
+    {
+      data: [5, 4, 3, 5, 10],
+      type: 'bar',
+      stack: 'x'
+    }
+  ]
+};
+{% endchart %}
+
+````
 
 When you run 
 ```bash

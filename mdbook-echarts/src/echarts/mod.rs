@@ -46,6 +46,7 @@ impl Preprocessor for ECharts {
             }
         }
 
+        // 遍历书籍章节，替换 ECharts 代码块
         book.for_each_mut(|item: &mut BookItem| {
             if let BookItem::Chapter(ref mut chapter) = *item {
                 chapter.content = gen(chapter.content.as_str())
@@ -56,7 +57,7 @@ impl Preprocessor for ECharts {
     }
 
     fn supports_renderer(&self, renderer: &str) -> bool {
-        renderer != "not-supported"
+        renderer != "not-supported"  // 支持所有渲染器（示例逻辑）
     }
 }
 
@@ -67,6 +68,7 @@ pub fn gen(content: &str) -> String {
     const TAG_START_1: &str = "```echarts";
     const TAG_END_1: &str = "```";
     // let re = Regex::new(r"(?m)^```chart((.*\n)+?)?```$").unwrap();
+    // 匹配两种语法：```echarts 代码块 和 {% echarts %} 标签
     let re = Regex::new(r"```echarts((.*\n)+?)?```").unwrap();
 
     for mat in re.find_iter(s.clone().as_str()) {
@@ -94,18 +96,57 @@ pub fn gen(content: &str) -> String {
 
 fn gen_html(mat_str: &str, empty_str_vec: Vec<&str>) -> String {
     let mut mat_string = String::from(mat_str);
+    // 清理代码块标记
     for s in empty_str_vec {
         mat_string = mat_string.replace(s, "");
     }
 
-    let v = String::from(format!("chart_{}", Uuid::new_v4()));
-    let ids = v.split_at(14);
-    let id = ids.0;
-    // let div = format!("<div id=\"{}\" style=\"width: 600px;height:400px;\"></div>", id);
-    let div = format!("<div id=\"{}\" style=\"height: 500px;\"></div>", id);
-    let echarts_src = format!("document.addEventListener('DOMContentLoaded', function() {{\nvar my{} = echarts.init(document.getElementById('{}'), null, {{\nrenderer: 'svg', \nuseDirtyRect: false\n}});\nvar option = {}\nmy{}.setOption(option);\n}})", id, id, mat_string.trim(), id);
-    let script = format!("<script type=\"text/javascript\">\n{};\n</script>", echarts_src);
-    let buf = format!("<div>\n{}\n{}\n</div>", div, script);
+    // 生成包含唯一 ID 的 HTML 和 JS 代码
+    // 方案1
+    // let uuid = Uuid::new_v4().to_simple().to_string();
+    // let buf = format!(r#"<div>
+    //                         <div id="{}" style="height: 500px;"></div>
+    //                         <script type="text/javascript">
+    //                             document.addEventListener('DOMContentLoaded', function() {{
+    //                                 var chart_{} = echarts.init(
+    //                                     document.getElementById('{}'), 
+    //                                     null, 
+    //                                     {{ renderer: 'svg', useDirtyRect: false }}
+    //                                 );
+    //                                 var app = {{}};
+    //                                 var option;
+    //                                 {}
+    //                                 option && chart_{}.setOption(option);
+    //                             }});
+    //                         </script>
+    //                      </div>"#, uuid, uuid, uuid, mat_string.trim(), uuid);
+
+    // 方案2
+    let uuid = Uuid::new_v4().to_simple().to_string();
+
+    // 新增替换逻辑
+    let mut content = mat_string.trim().to_string();
+    content = content.replace("chartDom", &format!("chartDom_{}", uuid));
+    content = content.replace("myChart", &format!("chart_{}", uuid));
+    content = content.replace("main", &uuid);
+
+    // 新增空行消除逻辑（结合网页[3][11]的跨平台处理经验）
+    let re = Regex::new(r"(?m)^\s*\n").unwrap();            // 匹配空白行
+    content = re.replace_all(&content, "\n").to_string();   // 替换为单个换行
+    let re = Regex::new(r"\n{2,}").unwrap();                // 匹配连续换行
+    content = re.replace_all(&content, "\n").to_string();
+
+    let buf = format!(r#"
+<div>
+    <div id="{}" style="height: 500px;"></div>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {{
+            {}
+        }});
+    </script>
+</div>
+                         "#, uuid, content);
+
     return buf;
 }
 
