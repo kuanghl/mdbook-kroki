@@ -1,4 +1,4 @@
-mod chart;
+mod echarts;
 
 use std::io;
 use std::process;
@@ -8,11 +8,11 @@ use clap::{App, Arg, ArgMatches, SubCommand};
 use mdbook::errors::Error;
 use mdbook::preprocess::{CmdPreprocessor, Preprocessor};
 
-use chart::Chart;
+use echarts::ECharts;
 
 
 pub fn make_app() -> App<'static, 'static> {
-    App::new("chart-preprocessor")
+    App::new("echarts-preprocessor")
         .about("A mdbook preprocessor to auto generate book summary")
         .subcommand(
             SubCommand::with_name("supports")
@@ -21,14 +21,14 @@ pub fn make_app() -> App<'static, 'static> {
         )
         .subcommand(
             SubCommand::with_name("help")
-                .about("help doc for use mdbook-chart preprocessor"),
+                .about("help doc for use mdbook-echarts preprocessor"),
         )
 }
 
 fn main() {
     let matches = make_app().get_matches();
 
-    let preprocessor = Chart::new();
+    let preprocessor = ECharts::new();
 
     if let Some(sub_args) = matches.subcommand_matches("supports") {
         handle_supports(&preprocessor, sub_args);

@@ -24,15 +24,15 @@ pub struct MdGroup {
     pub md_list: Vec<MdFile>,
 }
 
-pub struct Chart;
+pub struct ECharts;
 
-impl Chart {
-    pub fn new() -> Chart {
-        Chart
+impl ECharts {
+    pub fn new() -> ECharts {
+        ECharts
     }
 }
 
-impl Preprocessor for Chart {
+impl Preprocessor for ECharts {
     fn name(&self) -> &str {
         "echarts"
     }
