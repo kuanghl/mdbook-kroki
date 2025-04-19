@@ -1,2 +1,6 @@
 Cargo.lock
 target/
+
+package-lock.json
+# dist/
+node_modules/
