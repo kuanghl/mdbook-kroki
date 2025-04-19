@@ -1,0 +1,19 @@
+[package]
+name = "mdbook-kroki"
+version = "0.2.2"
+authors = ["Alex Koz. <a@koz.email>"]
+description = "SvgBob mdbook preprocessor which swaps code-blocks with neat SVG."
+homepage = "https://nest.pijul.com/fzzr/mdbook-kroki"
+repository = "https://github.com/boozook/mdbook-kroki.git"
+keywords = ["mdbook", "markdown", "ascii", "svg", "bob"]
+categories = ["command-line-utilities", "text-processing", "visualization"]
+edition = "2021"
+readme = "README.md"
+license = "LICENSE"
+
+[dependencies]
+anyhow = "1.0.70"   # 错误处理  
+regex = "1.10.0"    # 正则匹配
+rayon = "1.0.0"
+reqwest = { version = "=0.12.15", features = ["blocking", "rustls-tls"], default-features = false }
+
