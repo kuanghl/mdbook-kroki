@@ -4,3 +4,11 @@ target/
 package-lock.json
 # dist/
 node_modules/
+
+# binary
+pdf2image-linux
+pdf2image-macos
+pdf2image-win.exe
+tikz2svg-linux
+tikz2svg-macos
+tikz2svg-win.exe
