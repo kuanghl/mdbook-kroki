@@ -59,30 +59,6 @@ option = {
   ]
 };
 ```
-
-or 
-
-{% echarts %}
-option = {
-  xAxis: {
-    data: ['A', 'B', 'C', 'D', 'E']
-  },
-  yAxis: {},
-  series: [
-    {
-      data: [10, 22, 28, 43, 49],
-      type: 'bar',
-      stack: 'x'
-    },
-    {
-      data: [5, 4, 3, 5, 10],
-      type: 'bar',
-      stack: 'x'
-    }
-  ]
-};
-{% endchart %}
-
 ````
 
 - solution 2 used.
@@ -115,36 +91,6 @@ option = {
   ]
 };
 ```
-
-or 
-
-{% echarts %}
-var chartDom = document.getElementById('main');
-var myChart = echarts.init(chartDom, null, {
-  renderer: 'svg'
-});
-var option;
-
-option = {
-  xAxis: {
-    data: ['A', 'B', 'C', 'D', 'E']
-  },
-  yAxis: {},
-  series: [
-    {
-      data: [10, 22, 28, 43, 49],
-      type: 'bar',
-      stack: 'x'
-    },
-    {
-      data: [5, 4, 3, 5, 10],
-      type: 'bar',
-      stack: 'x'
-    }
-  ]
-};
-{% endchart %}
-
 ````
 
 When you run 

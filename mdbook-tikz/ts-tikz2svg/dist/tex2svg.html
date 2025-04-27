@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- 必须引入 TikZJax 的字体 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-tikzjax@latest/css/fonts.css">
+</head>
+<body>
+  <code id="latex-js">
+  \begin{document}
+    \begin{tikzpicture}
+      \draw (0,0) circle (1in);
+    \end{tikzpicture}
+  \end{document}
+  </code>
+  <div id="svg-container"></div>
+
+  <!-- 引入编译后的 JS -->
+  <script src="tex2svg.js"></script>
+  <script>
+    // 从 DOM 获取 TikZ 代码
+    const tikzCode = document.getElementById('latex-js').textContent;
+    
+    // 调用转换函数
+    convertTikzToSvg(tikzCode)
+      .then(svg => {
+        document.getElementById('svg-container').innerHTML = svg;
+      })
+      .catch(err => console.error(err));
+  </script>
+</body>
+</html>

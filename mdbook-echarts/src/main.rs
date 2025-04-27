@@ -8,8 +8,10 @@ use clap::{App, Arg, ArgMatches, SubCommand};
 use mdbook::errors::Error;
 use mdbook::preprocess::{CmdPreprocessor, Preprocessor};
 
-use echarts::ECharts;
+use env_logger::Builder;
+use log::LevelFilter;
 
+use echarts::ECharts;
 
 pub fn make_app() -> App<'static, 'static> {
     // 使用 clap 库构建命令行接口
@@ -28,6 +30,10 @@ pub fn make_app() -> App<'static, 'static> {
 }
 
 fn main() {
+    Builder::new()
+        .filter_level(LevelFilter::Info)    // 强制设置默认级别为 info
+        .init();                            // 初始化日志系统
+
     let matches = make_app().get_matches();
 
     let preprocessor = ECharts::new();

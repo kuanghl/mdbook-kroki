@@ -1,0 +1,16 @@
+[package]
+name = "mdbook-tikz"
+version = "0.2.2"
+authors = ["Alex Koz. <a@koz.email>"]
+description = "SvgBob mdbook preprocessor which swaps code-blocks with neat SVG."
+homepage = "https://nest.pijul.com/fzzr/mdbook-tikz"
+repository = "https://github.com/boozook/mdbook-tikz.git"
+keywords = ["mdbook", "markdown", "ascii", "svg", "bob"]
+categories = ["command-line-utilities", "text-processing", "visualization"]
+edition = "2021"
+readme = "README.md"
+license = "LICENSE"
+
+[dependencies]
+log = "0.4.17"
+env_logger = "0.11.1"

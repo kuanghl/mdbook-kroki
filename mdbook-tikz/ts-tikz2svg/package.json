@@ -1,0 +1,25 @@
+{
+  "name": "tex2svg",
+  "version": "1.0.0",
+  "main": "src/tex2svg.ts",
+  "scripts": {
+    "build": "tsc",
+    "package": "pkg dist/tex2svg.js --targets node18-win-x64,node18-linux-x64,node18-macos-x64 --output tikz2svg"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "@types/tar-fs": "^2.0.4",
+    "node-tikzjax": "^1.0.3",
+    "pkg": "^5.8.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "elkjs-svg": "^0.2.1"
+  }
+}
