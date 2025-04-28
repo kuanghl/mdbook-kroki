@@ -206,12 +206,13 @@ fn echarts_gen_html(mat_str: &str, empty_str_vec: Vec<&str>) -> String {
     let buf = format!(
         r#"
 <div>
-    <div id="{}" style="height: 500px;"></div>
+    <div id="{}" style="height: 500px" style="text-align: center;">
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function() {{
             {}
         }});
     </script>
+    </div>
 </div>
                          "#,
         uuid, content
@@ -244,7 +245,7 @@ fn svgbob_gen_html(mat_str: &str, empty_str_vec: Vec<&str>) -> String {
     let svg = bob_handler(&mat_string, &settings);
     let buf = format!(
         r#"
-<pre class='diagram-svgbob'>
+<pre class="diagram-svgbob" style="text-align: center;">
 {}
 </pre>
                          "#,
@@ -270,10 +271,11 @@ fn bytefield_gen_html(mat_str: &str, empty_str_vec: Vec<&str>) -> String {
     let buf = format!(
         r#"
 <div>
-    <div id="CommonMark-bytefiled"></div>
+    <div id="CommonMark-bytefiled" style="text-align: center;">
     <pre tabindex="{}"><code class="language-bytefield" data-lang="bytefield">
 {}
     </code></pre>
+    </div>
 </div>"#,
         TABINDEX.load(Ordering::Relaxed),
         content
