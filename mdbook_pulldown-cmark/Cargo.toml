@@ -1,0 +1,14 @@
+[package]
+name = "pulldown-cmark-demo"
+version = "0.0.1"
+authors = ["Alex Koz. <a@koz.email>"]
+description = "markdown to html with GitHub Flavored Markdown（GFM）style."
+keywords = ["mdbook", "markdown", "GFM"]
+categories = ["command-line-utilities", "text-processing", "visualization"]
+edition = "2021"
+build = "build.rs"  # 指定构建脚本
+
+[dependencies]
+katex = "0.4.6"
+pulldown-cmark = "0.13.0"
+

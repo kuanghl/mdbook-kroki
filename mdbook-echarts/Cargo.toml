@@ -28,6 +28,8 @@ log = "0.4.17"
 env_logger = "0.11.1"
 libc = "0.2.161"
 uuid = { version = "0.8", features = ["serde", "v4"] }
+katex = "0.4.6"
+pulldown-cmark = "0.13.0"
 
 [build-dependencies]
 cc = "1.1.36"    # 用于编译 C 代码

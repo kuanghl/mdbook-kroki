@@ -501,3 +501,4 @@ fn typst_gen_file(name: &str, mat_str: &str, empty_str_vec: Vec<&str>) {
         .expect("Failed to write content"); // 二进制写入优化[8](@ref)
     file.flush().expect("Failed to flush data"); // 确保数据落盘
 }
+
