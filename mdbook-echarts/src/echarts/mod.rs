@@ -132,7 +132,8 @@ pub fn gen(name: &str, content: &str) -> String {
         info!("latex tikz prepocessor start");
         let mat_str = mat.as_str();
         let empty_str_vec = vec![TAG_START_5, TAG_END_5];
-        tikz_gen_file(name, mat_str, empty_str_vec);
+        let buf = tikz_gen_file(name, mat_str, empty_str_vec);
+        s = s.replace(mat_str, buf.as_str());
     }
 
     const TAG_START_6: &str = "```pikchr";
@@ -155,7 +156,8 @@ pub fn gen(name: &str, content: &str) -> String {
         info!("typst prepocessor start");
         let mat_str = mat.as_str();
         let empty_str_vec = vec![TAG_START_7, TAG_END_7];
-        typst_gen_file(name, mat_str, empty_str_vec);
+        let buf = typst_gen_file(name, mat_str, empty_str_vec);
+        s = s.replace(mat_str, buf.as_str());
     }
 
     return s;
@@ -306,7 +308,7 @@ fn latex_gen_html(mat_str: &str, empty_str_vec: Vec<&str>) -> String {
     <latex-js baseURL="https://cdn.jsdelivr.net/npm/latex.js/dist/"><code>
 {}
     </code></latex-js>
-<div>"##,
+</div>"##,
         content
     );
 
@@ -367,7 +369,7 @@ fn tikz_gen_html(mat_str: &str, empty_str_vec: Vec<&str>) -> String {
     return buf;
 }
 
-fn tikz_gen_file(name: &str, mat_str: &str, empty_str_vec: Vec<&str>) {
+fn tikz_gen_file(name: &str, mat_str: &str, empty_str_vec: Vec<&str>) -> String {
     let mut mat_string = String::from(mat_str);
     let mut name_string = String::from(name);
 
@@ -403,21 +405,71 @@ fn tikz_gen_file(name: &str, mat_str: &str, empty_str_vec: Vec<&str>) {
 
     // 文件名构建
     let filename = format!("{}_{}.tex", title, PICTUREINDEX.load(Ordering::Relaxed));
+    let svgname = format!("{}_{}.svg", title, PICTUREINDEX.load(Ordering::Relaxed));
     let _ = PICTUREINDEX.fetch_add(1, Ordering::SeqCst) + 1;
 
     // 构建完整文件路径
     let mut file_path = dir_path.clone();
-    file_path.push(filename);
-
-    if file_path.exists() {
-        return;
-    }
+    file_path.push(&filename);
 
     // 写入文件内容
-    let mut file = File::create(&file_path).expect("Failed to create file"); // 创建或覆盖文件[4](@ref)
-    file.write_all(mat_string.as_bytes())
-        .expect("Failed to write content"); // 二进制写入优化[8](@ref)
-    file.flush().expect("Failed to flush data"); // 确保数据落盘
+    if file_path.exists() {
+        // 读取现有文件内容
+        let existing_content = fs::read_to_string(&file_path)
+            .expect("Failed to read existing file content");
+        if existing_content != mat_string {
+            let mut file = File::create(&file_path).expect("Failed to create file"); // 创建或覆盖文件[4](@ref)
+            file.write_all(mat_string.as_bytes())
+                .expect("Failed to write content"); // 二进制写入优化[8](@ref)
+            file.flush().expect("Failed to flush data"); // 确保数据落盘
+        }
+    } 
+    else {
+        let mut file = File::create(&file_path).expect("Failed to create file"); // 创建或覆盖文件[4](@ref)
+        file.write_all(mat_string.as_bytes())
+            .expect("Failed to write content"); // 二进制写入优化[8](@ref)
+        file.flush().expect("Failed to flush data"); // 确保数据落盘
+    }
+
+    // 查找对应svg文件
+    let stem = file_path.file_stem().map(|s| s.to_os_string());
+    if let Some(stem) = stem {
+        file_path.set_file_name(&stem);
+        file_path.set_extension("svg");
+    }
+
+    // 清理代码行中的<p></p>换行符
+    let mut content = mat_string.trim().to_string();
+    let re = Regex::new(r"(?m)^\s*\n").unwrap(); // 匹配空白行
+    content = re.replace_all(&content, "\n").to_string(); // 替换为单个换行
+    let re = Regex::new(r"\n{2,}").unwrap(); // 匹配连续换行
+    content = re.replace_all(&content, "\n").to_string();
+
+    if file_path.exists() {
+        let buf = format!(
+        r#"
+<div><details><summary>{}</summary>
+<div id="CommonMark-latex tikz"></div>
+<pre><code class="language-latex tikz">
+{}
+</code></pre></details></div>
+<div align=center>
+<img src="./../images/{}/{}" alt="{}" class="miv_mdbook-image-viewer" onclick="miv_openModal(this.src)">
+</div>"#, 
+filename, content, name_string, svgname, name);
+        return buf;
+    } 
+    else {
+        let buf = format!(
+        r#"
+<div><details><summary>{}</summary>
+<div id="CommonMark-latex tikz"></div>
+<pre><code class="language-latex tikz">
+{}
+</code></pre></details></div>
+"#, filename, content);
+        return buf;
+    }
 }
 
 fn pikchr_gen_html(mat_str: &str, empty_str_vec: Vec<&str>) -> String {
@@ -449,7 +501,7 @@ fn pikchr_gen_html(mat_str: &str, empty_str_vec: Vec<&str>) -> String {
     return buf;
 }
 
-fn typst_gen_file(name: &str, mat_str: &str, empty_str_vec: Vec<&str>) {
+fn typst_gen_file(name: &str, mat_str: &str, empty_str_vec: Vec<&str>) -> String {
     let mut mat_string = String::from(mat_str);
     let mut name_string = String::from(name);
 
@@ -485,20 +537,70 @@ fn typst_gen_file(name: &str, mat_str: &str, empty_str_vec: Vec<&str>) {
 
     // 文件名构建
     let filename = format!("{}_{}.typ", title, PICTUREINDEX.load(Ordering::Relaxed));
+    let svgname = format!("{}_{}.svg", title, PICTUREINDEX.load(Ordering::Relaxed));
     let _ = PICTUREINDEX.fetch_add(1, Ordering::SeqCst) + 1;
 
     // 构建完整文件路径
     let mut file_path = dir_path.clone();
-    file_path.push(filename);
+    file_path.push(&filename);
 
     if file_path.exists() {
-        return;
+        // 读取现有文件内容
+        let existing_content = fs::read_to_string(&file_path)
+            .expect("Failed to read existing file content");
+        if existing_content != mat_string {
+            let mut file = File::create(&file_path).expect("Failed to create file"); // 创建或覆盖文件[4](@ref)
+            file.write_all(mat_string.as_bytes())
+                .expect("Failed to write content"); // 二进制写入优化[8](@ref)
+            file.flush().expect("Failed to flush data"); // 确保数据落盘
+        }
+    } 
+    else {
+        // 写入文件内容
+        let mut file = File::create(&file_path).expect("Failed to create file"); // 创建或覆盖文件[4](@ref)
+        file.write_all(mat_string.as_bytes())
+            .expect("Failed to write content"); // 二进制写入优化[8](@ref)
+        file.flush().expect("Failed to flush data"); // 确保数据落盘
     }
 
-    // 写入文件内容
-    let mut file = File::create(&file_path).expect("Failed to create file"); // 创建或覆盖文件[4](@ref)
-    file.write_all(mat_string.as_bytes())
-        .expect("Failed to write content"); // 二进制写入优化[8](@ref)
-    file.flush().expect("Failed to flush data"); // 确保数据落盘
+    // 查找对应svg文件
+    let stem = file_path.file_stem().map(|s| s.to_os_string());
+    if let Some(stem) = stem {
+        file_path.set_file_name(&stem);
+        file_path.set_extension("svg");
+    }
+
+    // 清理代码行中的<p></p>换行符
+    let mut content = mat_string.trim().to_string();
+    let re = Regex::new(r"(?m)^\s*\n").unwrap(); // 匹配空白行
+    content = re.replace_all(&content, "\n").to_string(); // 替换为单个换行
+    let re = Regex::new(r"\n{2,}").unwrap(); // 匹配连续换行
+    content = re.replace_all(&content, "\n").to_string();
+
+    if file_path.exists() {
+        let buf = format!(
+        r#"
+<div><details><summary>{}</summary>
+<div id="CommonMark-typst"></div>
+<pre><code class="language-typst">
+{}
+</code></pre></details></div>
+<div align=center>
+<img src="./../images/{}/{}" alt="{}" class="miv_mdbook-image-viewer" onclick="miv_openModal(this.src)">
+</div>"#, 
+filename, content, name_string, svgname, name);
+        return buf;
+    } 
+    else {
+        let buf = format!(
+        r#"
+<div><details><summary>{}</summary>
+<div id="CommonMark-typst"></div>
+<pre><code class="language-typst">
+{}
+</code></pre></details></div>
+"#, filename, content);
+        return buf;
+    }
 }
 
