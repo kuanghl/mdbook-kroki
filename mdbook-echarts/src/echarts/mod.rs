@@ -160,6 +160,18 @@ pub fn gen(name: &str, content: &str) -> String {
         s = s.replace(mat_str, buf.as_str());
     }
 
+    const TAG_START_8: &str = "```wavedrom";
+    const TAG_END_8: &str = "```";
+    // 匹配语法：```wavedrom 代码块
+    let re = Regex::new(r"```wavedrom((.*\n)+?)?```").unwrap();
+    for mat in re.find_iter(s.clone().as_str()) {
+        info!("wavedrom prepocessor start");
+        let mat_str = mat.as_str();
+        let empty_str_vec = vec![TAG_START_8, TAG_END_8];
+        let buf = wavedrom_gen_html(mat_str, empty_str_vec);
+        s = s.replace(mat_str, buf.as_str());
+    }
+
     return s;
 }
 
@@ -604,3 +616,27 @@ filename, content, name_string, svgname, name);
     }
 }
 
+fn wavedrom_gen_html(mat_str: &str, empty_str_vec: Vec<&str>) -> String {
+    let mut mat_string = String::from(mat_str);
+    // 清理代码块标记
+    for s in empty_str_vec {
+        mat_string = mat_string.replace(s, "");
+    }
+
+    let mut content = mat_string.trim().to_string();
+    let re = Regex::new(r"(?m)^\s*\n").unwrap(); // 匹配空白行
+    content = re.replace_all(&content, "\n").to_string(); // 替换为单个换行
+    let re = Regex::new(r"\n{2,}").unwrap(); // 匹配连续换行
+    content = re.replace_all(&content, "\n").to_string();
+
+    let buf = format!(
+        r#"
+<div class="diagram-wavedrom" style="text-align:center;">
+<script type="WaveDrom">
+{}
+</script>
+</div>
+"#, content);
+
+    return buf;
+}
